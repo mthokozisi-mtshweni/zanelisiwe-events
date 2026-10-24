@@ -2762,6 +2762,9 @@ a { color: inherit; text-decoration: none; }
 /*  Toggle by adding data-theme="fire" to <html>                       */
 /* ================================================================== */
 [data-theme="fire"] {
+
+      color-scheme: dark;  
+
   /* Black base — warm, not cold */
   --bg: #0a0a0a;
   --bg-alt: #111111;
@@ -3594,19 +3597,25 @@ a { color: inherit; text-decoration: none; }
   background: rgba(255, 122, 45, 0.15);
 }
 
-/* Empty date shows as grayed out like other placeholders */
-.enquiry-form input[type="date"]:invalid,
-.enquiry-form input[type="date"]:not(:focus):not(.has-value) {
-  color: var(--text-dim);
-}
-
-/* Date has a value — use full ink colour */
-.enquiry-form input[type="date"]:focus,
-.enquiry-form input[type="date"].has-value,
-.enquiry-form input[type="date"]:valid {
+/* Date input inherits theme — the browser handles empty vs. filled state */
+.enquiry-form input[type="date"] {
   color: var(--ink);
 }
 
+/* Make the calendar icon prominent on dark backgrounds */
+[data-theme="fire"] .enquiry-form input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(88%) saturate(1854%) hue-rotate(346deg) brightness(101%) contrast(101%);
+  opacity: 0.9;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+[data-theme="fire"] .enquiry-form input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background: rgba(255, 122, 45, 0.18);
+}
 /* Firefox-specific — date fields use different internals */
 @-moz-document url-prefix() {
   .enquiry-form input[type="date"] {

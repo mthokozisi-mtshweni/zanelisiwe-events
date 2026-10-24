@@ -439,109 +439,20 @@ function About({ navigate }) {
 
 function Services({ onNavigate }) {
   const videoRefs = useRef({});
-  const activeRef = useRef(null);
-  const tokenRef = useRef(0);
-  const readyRef = useRef({});
-  const [activeIndex, setActiveIndex] = useState(null);
 
-  // Pre-warm videos on mount — decode frames so first hold is instant
-  useEffect(() => {
-    Object.entries(videoRefs.current).forEach(([idx, v]) => {
-      if (!v) return;
-      const warm = () => {
-        try {
-          v.muted = true;
-          v.currentTime = 0;
-          const p = v.play();
-          if (p?.then) {
-            p.then(() => {
-              v.pause();
-              v.currentTime = 0;
-              readyRef.current[idx] = true;
-            }).catch(() => {});
-          } else {
-            v.pause();
-            v.currentTime = 0;
-            readyRef.current[idx] = true;
-          }
-        } catch {}
-      };
-      if (v.readyState >= 2) warm();
-      else v.addEventListener("loadeddata", warm, { once: true });
-    });
-  }, []);
-
-  const pauseVideo = (i) => {
+  const play = (i) => {
     const v = videoRefs.current[i];
-    if (!v) return;
-    try {
+    if (v) {
+      v.play().catch(() => {});
+    }
+  };
+
+  const pause = (i) => {
+    const v = videoRefs.current[i];
+    if (v) {
       v.pause();
       v.currentTime = 0;
-    } catch {}
-  };
-
-  const activate = async (i) => {
-    const v = videoRefs.current[i];
-    if (!v) return;
-
-    if (activeRef.current !== null && activeRef.current !== i) {
-      pauseVideo(activeRef.current);
     }
-
-    activeRef.current = i;
-    const token = ++tokenRef.current;
-
-    v.currentTime = 0;
-    try {
-      await v.play();
-    } catch {
-      if (tokenRef.current === token) activeRef.current = null;
-      return;
-    }
-
-    const start = Date.now();
-    const painted = await new Promise((resolve) => {
-      const check = () => {
-        if (tokenRef.current !== token || activeRef.current !== i) {
-          return resolve(false);
-        }
-        if (v.videoWidth > 0 && v.readyState >= 2 && v.currentTime > 0.03) {
-          return resolve(true);
-        }
-        if (Date.now() - start > 3000) {
-          return resolve(false);
-        }
-        requestAnimationFrame(check);
-      };
-      check();
-    });
-
-    if (tokenRef.current !== token || activeRef.current !== i) return;
-
-    if (painted) {
-      setActiveIndex(i);
-    } else {
-      pauseVideo(i);
-      activeRef.current = null;
-    }
-  };
-
-  const deactivate = () => {
-    tokenRef.current += 1;
-    if (activeRef.current !== null) pauseVideo(activeRef.current);
-    activeRef.current = null;
-    setActiveIndex(null);
-  };
-
-  const onPointerDown = (e, i) => {
-    if (e.pointerType === "mouse") return;
-    if (e.target.closest(".block-cta")) return;
-    activate(i);
-  };
-
-  const onPointerUp = (e) => {
-    if (e.pointerType === "mouse") return;
-    deactivate();
   };
 
   return (
@@ -558,17 +469,11 @@ function Services({ onNavigate }) {
         {SERVICES.map((s, i) => (
           <article
             key={s.title}
-            className={`service-block ${activeIndex === i ? "is-active" : ""}`}
-            onPointerDown={(e) => onPointerDown(e, i)}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerUp}
-            onPointerLeave={onPointerUp}
-            onMouseEnter={() => {
-              if (window.matchMedia("(hover: hover)").matches) activate(i);
-            }}
-            onMouseLeave={() => {
-              if (window.matchMedia("(hover: hover)").matches) deactivate();
-            }}
+            className="service-block"
+            onMouseEnter={() => play(i)}
+            onMouseLeave={() => pause(i)}
+            onFocus={() => play(i)}
+            onBlur={() => pause(i)}
             tabIndex={0}
             data-reveal
             style={{ "--reveal-delay": `${i * 90}ms` }}
@@ -581,22 +486,23 @@ function Services({ onNavigate }) {
                   src={s.video}
                   poster={s.image}
                   muted
+                  loop
                   playsInline
-                  preload="auto"
-                  onError={() => { readyRef.current[i] = false; }}
-                  onEnded={deactivate}
+                  preload="none"
                   aria-hidden="true"
                 />
               )}
             </div>
 
             <div className="block-overlay" />
+            <div className="block-vignette" />
 
             <div className="block-content">
               <div className="block-top">
                 <span className="block-num">{s.num}</span>
                 {s.tag && <span className="block-tag">{s.tag}</span>}
               </div>
+
               <div className="block-bottom">
                 <h3>{s.title}</h3>
                 <p>{s.text}</p>
