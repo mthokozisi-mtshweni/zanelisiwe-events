@@ -149,15 +149,42 @@ video.addEventListener("canplay", () => {
       ScrollTrigger.refresh();
     };
 
-    const handleMetadata = () => {
-      if (video.duration > 0) setup();
-    };
 
-    const handleVideoReady = () => {
-  if (video.readyState >= 2 && video.duration > 0) {
+let videoInitialized = false;
+
+const handleVideoReady = async () => {
+  if (
+    videoInitialized ||
+    disposed ||
+    video.readyState < 2 ||
+    !Number.isFinite(video.duration) ||
+    video.duration <= 0
+  ) {
+    return;
+  }
+
+  videoInitialized = true;
+
+  try {
+    await video.play();
+    video.pause();
+    video.currentTime = 0;
+  } catch (error) {
+    console.warn("Hero video warm-up failed:", error);
+  }
+
+  if (!disposed) {
     setup();
   }
 };
+
+video.addEventListener("loadedmetadata", handleVideoReady);
+video.addEventListener("loadeddata", handleVideoReady);
+motionQuery.addEventListener("change", setup);
+
+if (video.readyState >= 2) {
+  handleVideoReady();
+}
 
 video.addEventListener("loadedmetadata", handleVideoReady);
 video.addEventListener("loadeddata", handleVideoReady);
