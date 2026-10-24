@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   FiArrowRight, FiArrowUpRight, FiArrowDown, FiMenu, FiX,
   FiMapPin, FiMail, FiInstagram, FiFacebook, FiStar, FiCheck,
-  FiHeart, FiFeather, FiMessageCircle, FiSend, FiArrowLeft
+  FiHeart, FiFeather, FiMessageCircle, FiSend, FiArrowLeft,
+  FiCalendar
 } from "react-icons/fi";
 
 import ScrollCinematicHero from "./components/ScrollCinematicHero";
@@ -1016,10 +1017,29 @@ function Contact() {
                 </select>
                 {errors.eventType && <span className="field-error">{errors.eventType}</span>}
               </label>
-              <label>
-                Event date
-                <input name="eventDate" type="date" value={form.eventDate} onChange={update} />
-              </label>
+             <label>
+  Event date
+  <div className="date-field">
+    <span className={`date-display ${form.eventDate ? "is-filled" : ""}`}>
+      {form.eventDate
+        ? new Date(form.eventDate + "T00:00:00").toLocaleDateString("en-ZA", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+          })
+        : "Select a date for the event"}
+    </span>
+    <FiCalendar className="date-icon" size={17} aria-hidden="true" />
+    <input
+      type="date"
+      name="eventDate"
+      value={form.eventDate}
+      onChange={update}
+      className="date-native"
+      aria-label="Event date"
+    />
+  </div>
+</label>
               <label className="span-2">
                 Location *
                 <input name="location" value={form.location} onChange={update} placeholder="Town or venue" className={errors.location ? "has-error" : ""} />
