@@ -60,8 +60,8 @@ video.addEventListener("canplay", () => {
       );
 
       if (motionQuery.matches) {
-        video.pause();
-        video.currentTime = 0;
+        // video.pause();
+        // video.currentTime = 0;
         return;
       }
 
@@ -166,9 +166,9 @@ const handleVideoReady = async () => {
   videoInitialized = true;
 
   try {
-    await video.play();
-    video.pause();
-    video.currentTime = 0;
+    // await video.play();
+    // video.pause();
+    // video.currentTime = 0;
   } catch (error) {
     console.warn("Hero video warm-up failed:", error);
   }
