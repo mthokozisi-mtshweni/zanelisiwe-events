@@ -145,7 +145,16 @@ useEffect(() => {
     }
 
     initialized = true;
+
+video.play()
+  .then(() => {
+    video.pause();
     setup();
+  })
+  .catch((error) => {
+    console.warn("Video initialization failed:", error);
+    setup();
+  });
   };
 
   video.addEventListener("error", handleVideoError);
