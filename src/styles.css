@@ -3759,8 +3759,8 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--line);
   border-radius: 6px;
   font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 400;
+  font-size: 12px;
+  font-weight: 300;
   color: var(--text-dim);
   pointer-events: none;
   overflow: hidden;
@@ -3859,4 +3859,42 @@ a { color: inherit; text-decoration: none; }
 /* Force dark native picker on fire theme (mobile) */
 [data-theme="fire"] .date-native {
   color-scheme: dark;
+}
+
+
+
+.date-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 44px 0 16px;
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 12px;           /* ← matches input::placeholder */
+  font-weight: 300;
+  color: var(--text-dim);      /* ← matches input::placeholder */
+  pointer-events: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease), box-shadow 0.3s var(--ease), font-size 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+/* When a date is selected — match the filled input look */
+.date-display.is-filled {
+  font-size: 2px;             /* ← matches input value */
+  color: var(--ink);           /* ← matches input value */
+}
+
+
+.enquiry-form input::placeholder,
+.enquiry-form textarea::placeholder {
+  text-transform: lowercase;
+}
+
+.date-display:not(.is-filled) {
+  text-transform: lowercase;
 }
