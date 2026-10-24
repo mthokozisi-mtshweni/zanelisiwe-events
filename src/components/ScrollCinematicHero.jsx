@@ -194,7 +194,7 @@ useEffect(() => {
       aria-label="Discover Zanelisiwe Events"
     >
       <div className="cinematic-stage" ref={stageRef}>
-        <video
+        {/* <video
           ref={videoRef}
           className="cinematic-video"
            src="/hero-scrub-optimized.mp4"
@@ -204,10 +204,10 @@ useEffect(() => {
           preload="auto"
           aria-hidden="true"
           tabIndex={-1}
-        />
+        /> */}
 
 
-{/* <video
+<video
   ref={videoRef}
   className="cinematic-video"
   src="/hero-scrub-optimized.mp4"
@@ -219,8 +219,7 @@ useEffect(() => {
   preload="auto"
   aria-hidden="true"
   tabIndex={-1}
-/> */}
-
+/>
         <div className="cinematic-overlay" aria-hidden="true" />
         <div className="cinematic-grain" aria-hidden="true" />
 
