@@ -375,7 +375,7 @@
 .cinematic-copy {
   position: absolute;
   z-index: 3;
-  top: 50%;
+  top: 46%;
   left: clamp(24px, 9vw, 140px);
   width: min(850px, calc(100% - 48px));
   transform: translateY(-50%);
@@ -383,8 +383,11 @@
 
 .cinematic-copy--middle,
 .cinematic-copy--ending {
+     margin-top: -40px;
   visibility: hidden;
 }
+
+
 
 /* Eyebrow — orange gradient text */
 .cinematic-eyebrow {
@@ -690,4 +693,106 @@
     animation: none;
   }
 }
+
+
+.cinematic-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.cinematic-cta {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 14px 24px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.cinematic-cta--gold {
+  background: #ff7a2d;
+  border-color: #ff7a2d;
+  color: #fff;
+}
+
+.cinematic-cta--gold:hover {
+  background: #edbd62;
+  border-color: #edbd62;
+  transform: translateY(-2px);
+  color: #0a0a0a;
+}
+
+.cinematic-cta--outline {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.65);
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+}
+
+.cinematic-cta--outline:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.cinematic-cta:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 4px;
+}
+
+@media (max-width: 480px) {
+  .cinematic-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cinematic-cta {
+    min-height: 44px;
+    padding: 12px 17px;
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-cta {
+    transition: none;
+  }
+
+  .cinematic-cta:hover {
+    transform: none;
+  }
+}
+
+
+
+
+
+
+
 

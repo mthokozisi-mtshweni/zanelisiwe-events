@@ -1,0 +1,124 @@
+
+.second-hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  background: #17110f;
+  color: #fff;
+}
+
+.second-hero__video {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.second-hero__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    90deg,
+    rgba(17, 12, 10, 0.82) 0%,
+    rgba(25, 15, 11, 0.58) 48%,
+    rgba(25, 15, 11, 0.18) 100%
+  );
+}
+
+.second-hero__content {
+  width: min(900px, 100%);
+  padding: 110px clamp(24px, 9vw, 140px);
+}
+
+.second-hero__eyebrow {
+  color: #ff9a55;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+}
+
+.second-hero__content h1 {
+  max-width: 850px;
+  margin: 22px 0;
+  font-size: clamp(40px, 6.2vw, 82px);
+  line-height: 1.06;
+  font-weight: 500;
+}
+
+.second-hero__content h1 em {
+  color: #ffb16f;
+  font-family: Georgia, serif;
+  font-weight: 400;
+}
+
+.second-hero__content > p {
+  max-width: 570px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.8;
+}
+
+.second-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.second-hero__button {
+  min-height: 48px;
+  padding: 14px 23px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffad69, #d85b25);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.25s ease;
+}
+
+.second-hero__button:hover {
+  transform: translateY(-3px);
+}
+
+.second-hero__button--outline {
+  border-color: rgba(255, 255, 255, 0.65);
+  background: rgba(20, 15, 13, 0.2);
+}
+
+@media (max-width: 600px) {
+  .second-hero__overlay {
+    background: linear-gradient(
+      0deg,
+      rgba(17, 12, 10, 0.88) 0%,
+      rgba(17, 12, 10, 0.58) 58%,
+      rgba(17, 12, 10, 0.32) 100%
+    );
+  }
+
+  .second-hero__content {
+    padding: 100px 24px 70px;
+  }
+
+  .second-hero__content h1 {
+    font-size: clamp(38px, 10vw, 58px);
+  }
+
+  .second-hero__actions {
+    gap: 10px;
+  }
+
+  .second-hero__button {
+    padding: 13px 17px;
+    font-size: 13px;
+  }
+}

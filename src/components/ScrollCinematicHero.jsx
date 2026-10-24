@@ -219,7 +219,8 @@ video.play()
 <video
   ref={videoRef}
   className="cinematic-video"
-  src="/hero-scrub-optimized.mp4"
+  //src="/second-hero-optimized.mp4"
+src="/hero-scrub-optimized.mp4"
   poster="/images/pic1.jpg"
   muted
   playsInline

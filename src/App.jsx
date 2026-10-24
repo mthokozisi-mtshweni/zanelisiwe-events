@@ -2,10 +2,13 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   FiArrowRight, FiArrowUpRight, FiArrowDown, FiMenu, FiX,
   FiMapPin, FiMail, FiInstagram, FiFacebook, FiStar, FiCheck,
-  FiHeart, FiFeather, FiMessageCircle, FiSend
+  FiHeart, FiFeather, FiMessageCircle, FiSend, FiArrowLeft
 } from "react-icons/fi";
 
 import ScrollCinematicHero from "./components/ScrollCinematicHero";
+
+// import SecondHero from "./components/SecondHero";
+
 /* ------------------------------------------------------------------ */
 /*  BRAND                                                              */
 /* ------------------------------------------------------------------ */
@@ -30,12 +33,29 @@ const IMAGES = {
 };
 
 const EVENTS = [
+  // Weddings (2)
   { title: "Timeless Weddings", category: "Weddings", image: IMAGES.wedding, text: "Romantic, elegant, unforgettable." },
+  { title: "Reception Styling", category: "Weddings", image: IMAGES.table, text: "Tablescapes designed for the moment." },
+
+  // Birthdays (2)
   { title: "Birthday Celebrations", category: "Birthdays", image: IMAGES.birthday, text: "Celebrate in your own style." },
+  { title: "Milestone Florals", category: "Birthdays", image: IMAGES.flowers, text: "Marking the years with beauty." },
+
+  // Baby Showers (2)
   { title: "Baby Showers", category: "Baby showers", image: IMAGES.baby, text: "Little moments. Big joy." },
+  { title: "Soft Arrivals", category: "Baby showers", image: IMAGES.bridal, text: "Gentle tones for a sweet welcome." },
+
+  // Bridal Showers (2)
   { title: "Bridal Showers", category: "Bridal showers", image: IMAGES.bridal, text: "A beautiful start to forever." },
+  { title: "Before the Vows", category: "Bridal showers", image: IMAGES.table, text: "An intimate gathering before the day." },
+
+  // Traditional (2)
   { title: "Traditional Celebrations", category: "Traditional", image: IMAGES.traditional, text: "Honour your heritage." },
-  { title: "Corporate Events", category: "Corporate", image: IMAGES.corporate, text: "Professional. Polished. Memorable." }
+  { title: "Heritage Ceremonies", category: "Traditional", image: IMAGES.tradition, text: "Rooted in culture and love." },
+
+  // Corporate (2)
+  { title: "Corporate Events", category: "Corporate", image: IMAGES.corporate, text: "Professional. Polished. Memorable." },
+  { title: "Brand Experiences", category: "Corporate", image: IMAGES.wedding, text: "Events that tell your story." }
 ];
 
 const SERVICES = [
@@ -94,19 +114,37 @@ const REVIEWS = [
   {
     quote: "From the first conversation to the final detail, everything felt considered. Our guests are still talking about the room.",
     name: "Naledi M.",
-    event: "Wedding, Johannesburg",
+    event: "Wedding · Johannesburg",
     rating: 5
   },
   {
     quote: "Zanelisiwe Events took every idea we had and made it feel warm, cohesive, and completely ours.",
     name: "Thandeka K.",
-    event: "Traditional Celebration, Pretoria",
+    event: "Traditional · Pretoria",
     rating: 5
   },
   {
     quote: "Professional, calm, and deeply thoughtful. The day ran beautifully — we didn't have to worry about a thing.",
     name: "Sipho & Lerato",
-    event: "Wedding, Mpumalanga",
+    event: "Wedding · Mpumalanga",
+    rating: 5
+  },
+  {
+    quote: "The décor was exactly what we envisioned — elegant, warm, and full of personal touches we didn't even know we needed.",
+    name: "Zanele D.",
+    event: "Bridal Shower · Sandton",
+    rating: 5
+  },
+  {
+    quote: "Our corporate year-end function was flawless. Every detail was handled with care and the team was a joy to work with.",
+    name: "Mandla N.",
+    event: "Corporate · Midrand",
+    rating: 5
+  },
+  {
+    quote: "They listened to what we wanted and delivered something even better. Truly thoughtful, truly personal.",
+    name: "Ayanda B.",
+    event: "Birthday · Soweto",
     rating: 5
   }
 ];
@@ -139,6 +177,7 @@ function useScrollReveal() {
 /* ------------------------------------------------------------------ */
 function ScrollProgress() {
   const [p, setP] = useState(0);
+
   useEffect(() => {
     const onScroll = () => {
       const h = document.documentElement.scrollHeight - window.innerHeight;
@@ -178,6 +217,7 @@ function Header({ onNavigate }) {
         <button className="mobile-toggle" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen(!open)}>
           {open ? <FiX size={22} /> : <FiMenu size={22} />}
         </button>
+
 
         <nav className={`nav ${open ? "nav-open" : ""}`}>
           {NAV_LINKS.map(({ label, id }) => (
@@ -399,19 +439,82 @@ function About({ navigate }) {
 
 function Services({ onNavigate }) {
   const videoRefs = useRef({});
+  const [activeIndex, setActiveIndex] = useState(null);
+  const activeRef = useRef(null);
+  const tokenRef = useRef(0);
 
-  const play = (i) => {
+  const pauseVideo = (i) => {
     const v = videoRefs.current[i];
-    if (v) {
-      v.play().catch(() => {}); // ignore autoplay rejections
-    }
+    if (!v) return;
+    try {
+      v.pause();
+      v.currentTime = 0;
+    } catch {}
   };
 
-  const pause = (i) => {
+  const deactivate = () => {
+    tokenRef.current += 1;
+    if (activeRef.current !== null) pauseVideo(activeRef.current);
+    activeRef.current = null;
+    setActiveIndex(null);
+  };
+
+  const activate = async (i) => {
     const v = videoRefs.current[i];
-    if (v) {
-      v.pause();
-      v.currentTime = 0; // reset so it plays from the start next time
+    if (!v) return;
+
+    if (activeRef.current !== null && activeRef.current !== i) {
+      pauseVideo(activeRef.current);
+    }
+
+    activeRef.current = i;
+    const token = ++tokenRef.current;
+
+    try {
+      v.currentTime = 0;
+      await v.play();
+    } catch {
+      if (tokenRef.current === token) activeRef.current = null;
+      return;
+    }
+
+    const startedAt = Date.now();
+    const check = () => {
+      if (tokenRef.current !== token) return;
+      if (activeRef.current !== i) return;
+
+      const hasFrames =
+        v.videoWidth > 0 &&
+        v.videoHeight > 0 &&
+        v.readyState >= 2 &&
+        !v.paused;
+
+      if (hasFrames) {
+        setActiveIndex(i);
+        return;
+      }
+
+      if (Date.now() - startedAt > 3000) {
+        console.warn(
+          `[Services] Video ${i} failed to render in 3s — check that the file exists on the server.`,
+          { src: v.currentSrc || v.src, readyState: v.readyState, videoWidth: v.videoWidth }
+        );
+        pauseVideo(i);
+        activeRef.current = null;
+        return;
+      }
+
+      requestAnimationFrame(check);
+    };
+
+    check();
+  };
+
+  const handleTap = (i) => {
+    if (activeRef.current === i) {
+      deactivate();
+    } else {
+      activate(i);
     }
   };
 
@@ -429,11 +532,14 @@ function Services({ onNavigate }) {
         {SERVICES.map((s, i) => (
           <article
             key={s.title}
-            className="service-block"
-            onMouseEnter={() => play(i)}
-            onMouseLeave={() => pause(i)}
-            onFocus={() => play(i)}
-            onBlur={() => pause(i)}
+            className={`service-block ${activeIndex === i ? "is-active" : ""}`}
+            onMouseEnter={() => { if (window.innerWidth > 720) activate(i); }}
+            onMouseLeave={() => { if (window.innerWidth > 720) deactivate(); }}
+            onClick={(e) => {
+              if (window.innerWidth > 720) return;
+              if (e.target.closest(".block-cta")) return;
+              handleTap(i);
+            }}
             tabIndex={0}
             data-reveal
             style={{ "--reveal-delay": `${i * 90}ms` }}
@@ -448,7 +554,7 @@ function Services({ onNavigate }) {
                   muted
                   loop
                   playsInline
-                  preload="none"
+                  preload="metadata"
                   aria-hidden="true"
                 />
               )}
@@ -520,13 +626,12 @@ function Portfolio() {
 
       <div className="portfolio-grid">
         {filtered.map((e, i) => (
-          <button
-            className="portfolio-item"
-            key={e.title}
-            onClick={() => setLightbox(e)}
-            data-reveal
-            style={{ "--reveal-delay": `${i * 60}ms` }}
-          >
+  <button
+    className="portfolio-item"
+    key={`${filter}-${e.title}`}
+    onClick={() => setLightbox(e)}
+    style={{ "--reveal-delay": `${i * 60}ms` }}
+  >
             <img src={e.image} alt={e.title} loading="lazy" />
             <span className="portfolio-overlay">
               <small>{e.category}</small>
@@ -560,35 +665,194 @@ function Portfolio() {
 }
 
 function Reviews() {
+  const trackRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [cardStep, setCardStep] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartX = useRef(null);
+
+  // Resize-aware visible count
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      setVisibleCount(w <= 700 ? 1 : w <= 1080 ? 2 : 3);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  // Measure card + gap step
+  useEffect(() => {
+    const measure = () => {
+      const track = trackRef.current;
+      if (!track) return;
+      const card = track.querySelector(".review-card");
+      if (!card) return;
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 24;
+      setCardStep(card.offsetWidth + gap);
+    };
+    const id = setTimeout(measure, 60);
+    window.addEventListener("resize", measure);
+    return () => {
+      clearTimeout(id);
+      window.removeEventListener("resize", measure);
+    };
+  }, [visibleCount]);
+
+  const maxIndex = Math.max(0, REVIEWS.length - visibleCount);
+
+  useEffect(() => {
+    setActiveIndex((i) => Math.min(i, maxIndex));
+  }, [maxIndex]);
+
+  const slide = (dir) => {
+    setActiveIndex((i) => Math.max(0, Math.min(maxIndex, i + dir)));
+  };
+
+  const goTo = (i) => setActiveIndex(Math.min(i, maxIndex));
+
+  // Drag handlers
+  const onPointerDown = (e) => {
+    dragStartX.current = e.clientX;
+    setIsDragging(true);
+  };
+  const onPointerMove = (e) => {
+    if (dragStartX.current === null) return;
+    setDragOffset(e.clientX - dragStartX.current);
+  };
+  const endDrag = () => {
+    if (dragStartX.current === null) return;
+    const drag = dragOffset;
+    dragStartX.current = null;
+    setIsDragging(false);
+    setDragOffset(0);
+    if (Math.abs(drag) > 60) {
+      slide(drag < 0 ? 1 : -1);
+    }
+  };
+
+  const atEnd = activeIndex >= maxIndex;
+  const canPrev = activeIndex > 0;
+  const translateX = -activeIndex * cardStep + (isDragging ? dragOffset : 0);
+
   return (
     <section id="reviews" className="reviews">
-      <div className="reviews-header" data-reveal>
-        <span className="kicker">Kind Words</span>
-        <h2>
-          What our clients<br />
-          <em>remember most.</em>
-        </h2>
+      <div className="reviews-header">
+        <div className="reviews-header-left">
+          <span className="kicker">Client Stories</span>
+          <h2>
+            Words that<br />
+            <em>stayed with us.</em>
+          </h2>
+        </div>
+
+        <div className="reviews-header-right">
+          <div className="reviews-counter">
+            <span className="reviews-counter-current">
+              {String(activeIndex + 1).padStart(2, "0")}
+            </span>
+            <span className="reviews-counter-divider">/</span>
+            <span className="reviews-counter-total">
+              {String(maxIndex + 1).padStart(2, "0")}
+            </span>
+          </div>
+
+          <div className="reviews-nav">
+            <button
+              className="reviews-nav-btn"
+              onClick={() => slide(-1)}
+              disabled={!canPrev}
+              aria-label="Previous"
+            >
+              <FiArrowLeft size={18} />
+            </button>
+            <button
+              className="reviews-nav-btn"
+              onClick={() => slide(1)}
+              disabled={atEnd}
+              aria-label="Next"
+            >
+              <FiArrowRight size={18} />
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="reviews-grid">
-        {REVIEWS.map((r, i) => (
-          <figure
-            className="review"
-            key={r.name}
-            data-reveal
-            style={{ "--reveal-delay": `${i * 100}ms` }}
-          >
-            <div className="review-stars">
-              {Array.from({ length: r.rating }).map((_, n) => (
-                <FiStar key={n} size={12} fill="currentColor" />
-              ))}
-            </div>
-            <blockquote>“{r.quote}”</blockquote>
-            <figcaption>
-              <span className="review-name">{r.name}</span>
-              <span className="review-event">{r.event}</span>
-            </figcaption>
-          </figure>
+      <div className={`reviews-clip ${atEnd ? "is-end" : ""}`}>
+        <div
+          ref={trackRef}
+          className="reviews-track"
+          style={{
+            transform: `translateX(${translateX}px)`,
+            transition: isDragging
+              ? "none"
+              : "transform 900ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerLeave={endDrag}
+          onPointerCancel={endDrag}
+        >
+          {REVIEWS.map((r, i) => {
+            const initials = r.name
+              .split(" ")
+              .filter(Boolean)
+              .map((w) => w[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase();
+
+            return (
+              <article
+                key={i}
+                className={`review-card ${i === activeIndex ? "is-active" : ""}`}
+              >
+                <span className="review-quote-mark" aria-hidden="true">"</span>
+
+                <p className="review-text">{r.quote}</p>
+
+                <div className="review-meta-row">
+                  <div className="review-avatar" aria-hidden="true">
+                    {initials}
+                  </div>
+                  <div className="review-user">
+                    <div className="review-user-row">
+                      <span className="review-name">{r.name}</span>
+                      <span className="review-verified">✓</span>
+                    </div>
+                    <span className="review-event">{r.event}</span>
+                  </div>
+                  <div className="review-stars">
+                    {Array.from({ length: r.rating }).map((_, n) => (
+                      <FiStar key={n} size={10} fill="currentColor" />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="review-footer">
+                  <span className="review-footer-likes">
+                    <FiHeart size={11} fill="currentColor" />{" "}
+                    {18 + i * 7} people found this helpful
+                  </span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="reviews-dots">
+        {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+          <button
+            key={i}
+            className={`reviews-dot ${i === activeIndex ? "is-active" : ""}`}
+            onClick={() => goTo(i)}
+            aria-label={`Go to position ${i + 1}`}
+          />
         ))}
       </div>
     </section>
@@ -951,6 +1215,7 @@ function Footer({ onNavigate }) {
 export default function App() {
   useScrollReveal();
 
+    const [heroMode, setHeroMode] = useState("cinematic");
   const navigate = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -961,7 +1226,32 @@ export default function App() {
       <Header onNavigate={navigate} />
 
 <main>
+  {/* <ScrollCinematicHero onNavigate={navigate} /> */}
+
+  
+<div className="hero-test-switch">
+  {/* <button
+    onClick={() => setHeroMode("cinematic")}
+    className={heroMode === "cinematic" ? "active" : ""}
+  >
+    Cinematic scroll
+  </button> */}
+
+  {/* <button
+    onClick={() => setHeroMode("second")}
+    className={heroMode === "second" ? "active" : ""}
+  >
+    Second video
+  </button> */}
+</div>
+
+{heroMode === "cinematic" ? (
   <ScrollCinematicHero onNavigate={navigate} />
+) : (
+  <SecondHero onNavigate={navigate} />
+)}
+
+
   <About navigate={navigate} />
   <Services onNavigate={navigate} />
   <Portfolio />
