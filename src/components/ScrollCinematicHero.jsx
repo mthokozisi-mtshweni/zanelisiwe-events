@@ -29,9 +29,9 @@ useEffect(() => {
 
   if (!section || !stage || !video) return;
 
-  const motionQuery = window.matchMedia(
-    "(prefers-reduced-motion: reduce)"
-  );
+//   const motionQuery = window.matchMedia(
+//     "(prefers-reduced-motion: reduce)"
+//   );
 
   let ctx;
   let disposed = false;
