@@ -26,6 +26,18 @@ export default function ScrollCinematicHero({ onNavigate }) {
     const stage = stageRef.current;
     const video = videoRef.current;
 
+    video.addEventListener("error", () => {
+  console.error("Hero video error:", video.error);
+});
+
+video.addEventListener("loadeddata", () => {
+  console.log("Hero first frame loaded");
+});
+
+video.addEventListener("canplay", () => {
+  console.log("Hero video can play");
+});
+
     if (!section || !stage || !video) return;
 
     const motionQuery = window.matchMedia(
@@ -141,7 +153,14 @@ export default function ScrollCinematicHero({ onNavigate }) {
       if (video.duration > 0) setup();
     };
 
-    video.addEventListener("loadedmetadata", handleMetadata);
+    const handleVideoReady = () => {
+  if (video.readyState >= 2 && video.duration > 0) {
+    setup();
+  }
+};
+
+video.addEventListener("loadedmetadata", handleVideoReady);
+video.addEventListener("loadeddata", handleVideoReady);
     motionQuery.addEventListener("change", setup);
 
     if (video.readyState >= 1 && video.duration > 0) {
@@ -150,7 +169,8 @@ export default function ScrollCinematicHero({ onNavigate }) {
 
     return () => {
       disposed = true;
-      video.removeEventListener("loadedmetadata", handleMetadata);
+      video.removeEventListener("loadedmetadata", handleVideoReady);
+video.removeEventListener("loadeddata", handleVideoReady);
       motionQuery.removeEventListener("change", setup);
       ctx?.revert();
       section.classList.remove("cinematic-hero--static");
