@@ -95,15 +95,15 @@ video.addEventListener("canplay", () => {
 });
 
         // One continuous timeline controls both the video and text.
-        timeline.to(
-  video,
-  {
-    currentTime: video.duration,
-    duration: 1,
-    ease: "none",
-  },
-  0
-);
+//         timeline.to(
+//   video,
+//   {
+//     currentTime: video.duration,
+//     duration: 1,
+//     ease: "none",
+//   },
+//   0
+// );
 
         timeline.to(
           opening,
@@ -223,7 +223,7 @@ video.removeEventListener("loadeddata", handleVideoReady);
       aria-label="Discover Zanelisiwe Events"
     >
       <div className="cinematic-stage" ref={stageRef}>
-        <video
+        {/* <video
           ref={videoRef}
           className="cinematic-video"
           src="/hero-scrub.mp4"
@@ -233,7 +233,22 @@ video.removeEventListener("loadeddata", handleVideoReady);
           preload="auto"
           aria-hidden="true"
           tabIndex={-1}
-        />
+        /> */}
+
+
+<video
+  ref={videoRef}
+  className="cinematic-video"
+  src="/hero-scrub.mp4"
+  poster="/images/pic1.jpg"
+  muted
+  playsInline
+  autoPlay
+  loop
+  preload="auto"
+  aria-hidden="true"
+  tabIndex={-1}
+/>
 
         <div className="cinematic-overlay" aria-hidden="true" />
         <div className="cinematic-grain" aria-hidden="true" />
