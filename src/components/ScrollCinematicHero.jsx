@@ -21,188 +21,159 @@ export default function ScrollCinematicHero({ onNavigate }) {
   const middleRef = useRef(null);
   const endingRef = useRef(null);
 
-  useEffect(() => {
-    const section = sectionRef.current;
-    const stage = stageRef.current;
-    const video = videoRef.current;
+  
+useEffect(() => {
+  const section = sectionRef.current;
+  const stage = stageRef.current;
+  const video = videoRef.current;
 
-    video.addEventListener("error", () => {
-  console.error("Hero video error:", video.error);
-});
+  if (!section || !stage || !video) return;
 
-video.addEventListener("loadeddata", () => {
-  console.log("Hero first frame loaded");
-});
+  const motionQuery = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  );
 
-video.addEventListener("canplay", () => {
-  console.log("Hero video can play");
-});
+  let ctx;
+  let disposed = false;
+  let initialized = false;
 
-    if (!section || !stage || !video) return;
+  const handleVideoError = () => {
+    console.error("Hero video error:", video.error);
+  };
 
-    const motionQuery = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+  const handleLoadedData = () => {
+    console.log("Hero first frame loaded");
+  };
+
+  const handleCanPlay = () => {
+    console.log("Hero video can play");
+  };
+
+  const setup = () => {
+    if (disposed) return;
+
+    ctx?.revert();
+    ctx = undefined;
+
+    section.classList.toggle(
+      "cinematic-hero--static",
+      motionQuery.matches
     );
 
-    let ctx;
-    let disposed = false;
-
-    const setup = () => {
-      if (disposed) return;
-
-      // Clean up any previous timeline before rebuilding.
-      ctx?.revert();
-      ctx = undefined;
-
-      section.classList.toggle(
-        "cinematic-hero--static",
-        motionQuery.matches
-      );
-
-      if (motionQuery.matches) {
-        // video.pause();
-        // video.currentTime = 0;
-        return;
-      }
-
-      if (!Number.isFinite(video.duration) || video.duration <= 0) {
-        return;
-      }
-
-      ctx = gsap.context(() => {
-        const opening = openingRef.current;
-        const middle = middleRef.current;
-        const ending = endingRef.current;
-
-        gsap.set(opening, { autoAlpha: 1, y: 0 });
-        gsap.set(middle, { autoAlpha: 0, y: 28 });
-        gsap.set(ending, { autoAlpha: 0, y: 28 });
-
-        video.pause();
-        video.currentTime = 0;
-
-        const timeline = gsap.timeline({
-  defaults: { ease: "none" },
-  scrollTrigger: {
-    trigger: section,
-    pin: stage,
-    start: "top top",
-    end: "bottom bottom",
-    scrub: 0.4,
-    anticipatePin: 1,
-    invalidateOnRefresh: true,
-  },
-});
-
-        // One continuous timeline controls both the video and text.
-        timeline.to(
-  video,
-  {
-    currentTime: video.duration,
-    duration: 1,
-    ease: "none",
-  },
-  0
-);
-
-        timeline.to(
-          opening,
-          {
-            autoAlpha: 0,
-            y: -24,
-            duration: 0.1,
-          },
-          0.16
-        );
-
-        timeline.to(
-          middle,
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.08,
-          },
-          0.34
-        );
-
-        timeline.to(
-          middle,
-          {
-            autoAlpha: 0,
-            y: -20,
-            duration: 0.08,
-          },
-          0.57
-        );
-
-        timeline.to(
-          ending,
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.1,
-          },
-          0.72
-        );
-      }, section);
-
-      ScrollTrigger.refresh();
-    };
-
-
-let videoInitialized = false;
-
-const handleVideoReady = async () => {
-  if (
-    videoInitialized ||
-    disposed ||
-    video.readyState < 2 ||
-    !Number.isFinite(video.duration) ||
-    video.duration <= 0
-  ) {
-    return;
-  }
-
-  videoInitialized = true;
-
-  try {
-    // await video.play();
-    // video.pause();
-    // video.currentTime = 0;
-  } catch (error) {
-    console.warn("Hero video warm-up failed:", error);
-  }
-
-  if (!disposed) {
-    setup();
-  }
-};
-
-video.addEventListener("loadedmetadata", handleVideoReady);
-video.addEventListener("loadeddata", handleVideoReady);
-motionQuery.addEventListener("change", setup);
-
-if (video.readyState >= 2) {
-  handleVideoReady();
-}
-
-video.addEventListener("loadedmetadata", handleVideoReady);
-video.addEventListener("loadeddata", handleVideoReady);
-    motionQuery.addEventListener("change", setup);
-
-    if (video.readyState >= 1 && video.duration > 0) {
-      setup();
+    if (motionQuery.matches) {
+      video.pause();
+      return;
     }
 
-    return () => {
-      disposed = true;
-      video.removeEventListener("loadedmetadata", handleVideoReady);
-video.removeEventListener("loadeddata", handleVideoReady);
-      motionQuery.removeEventListener("change", setup);
-      ctx?.revert();
-      section.classList.remove("cinematic-hero--static");
-    };
-  }, []);
+    if (
+      !Number.isFinite(video.duration) ||
+      video.duration <= 0 ||
+      video.readyState < 2
+    ) {
+      return;
+    }
+
+    ctx = gsap.context(() => {
+      const opening = openingRef.current;
+      const middle = middleRef.current;
+      const ending = endingRef.current;
+
+      gsap.set(opening, { autoAlpha: 1, y: 0 });
+      gsap.set(middle, { autoAlpha: 0, y: 28 });
+      gsap.set(ending, { autoAlpha: 0, y: 28 });
+
+      const timeline = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: section,
+          pin: stage,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.4,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      timeline.to(
+        video,
+        {
+          currentTime: video.duration,
+          duration: 1,
+          ease: "none",
+        },
+        0
+      );
+
+      timeline.to(
+        opening,
+        { autoAlpha: 0, y: -24, duration: 0.1 },
+        0.16
+      );
+
+      timeline.to(
+        middle,
+        { autoAlpha: 1, y: 0, duration: 0.08 },
+        0.34
+      );
+
+      timeline.to(
+        middle,
+        { autoAlpha: 0, y: -20, duration: 0.08 },
+        0.57
+      );
+
+      timeline.to(
+        ending,
+        { autoAlpha: 1, y: 0, duration: 0.1 },
+        0.72
+      );
+    }, section);
+
+    ScrollTrigger.refresh();
+  };
+
+  const handleVideoReady = () => {
+    if (
+      disposed ||
+      initialized ||
+      video.readyState < 2 ||
+      !Number.isFinite(video.duration) ||
+      video.duration <= 0
+    ) {
+      return;
+    }
+
+    initialized = true;
+    setup();
+  };
+
+  video.addEventListener("error", handleVideoError);
+  video.addEventListener("loadeddata", handleLoadedData);
+  video.addEventListener("canplay", handleCanPlay);
+  video.addEventListener("loadedmetadata", handleVideoReady);
+  video.addEventListener("loadeddata", handleVideoReady);
+  motionQuery.addEventListener("change", setup);
+
+  if (video.readyState >= 2) {
+    handleVideoReady();
+  }
+
+  return () => {
+    disposed = true;
+
+    video.removeEventListener("error", handleVideoError);
+    video.removeEventListener("loadeddata", handleLoadedData);
+    video.removeEventListener("canplay", handleCanPlay);
+    video.removeEventListener("loadedmetadata", handleVideoReady);
+    video.removeEventListener("loadeddata", handleVideoReady);
+    motionQuery.removeEventListener("change", setup);
+
+    ctx?.revert();
+    section.classList.remove("cinematic-hero--static");
+  };
+}, []);
+
 
   const navigate = (id) => {
     if (onNavigate) {
