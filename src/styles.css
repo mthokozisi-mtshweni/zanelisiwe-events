@@ -3479,3 +3479,143 @@ a { color: inherit; text-decoration: none; }
     );
   }
 }
+
+/* ================================================================== */
+/*  MOBILE VIDEO GUARD — keep content until video is confirmed         */
+/* ================================================================== */
+@media (max-width: 720px) {
+  .service-block .block-content {
+    transition: opacity 0.4s var(--ease);
+  }
+
+  .service-block.is-active .block-content {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .service-block .block-media video {
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+  }
+
+  .service-block.is-active .block-media video {
+    opacity: 1;
+  }
+}
+
+
+/* ================================================================== */
+/*  SERVICES — is-active state (global for any device)                 */
+/* ================================================================== */
+.service-block.is-active .block-content {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+.service-block.is-active .block-media video {
+  opacity: 1;
+  transform: scale(1.06);
+}
+.service-block.is-active .block-media img {
+  transform: scale(1.06);
+  filter: brightness(0.9) saturate(1.1);
+}
+.service-block.is-active .block-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 15, 10, 0.15) 0%,
+    rgba(10, 15, 10, 0.05) 30%,
+    rgba(10, 15, 10, 0.25) 70%,
+    rgba(10, 15, 10, 0.55) 100%
+  );
+}
+
+
+.service-block.is-active .block-content {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+.service-block.is-active .block-media video {
+  opacity: 1;
+  transform: scale(1.06);
+}
+.service-block.is-active .block-media img {
+  transform: scale(1.06);
+  filter: brightness(0.9) saturate(1.1);
+}
+.service-block.is-active .block-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 15, 10, 0.15) 0%,
+    rgba(10, 15, 10, 0.05) 30%,
+    rgba(10, 15, 10, 0.25) 70%,
+    rgba(10, 15, 10, 0.55) 100%
+  );
+}
+
+/* ================================================================== */
+/*  SERVICES — prevent text selection / context menu during hold       */
+/* ================================================================== */
+@media (max-width: 720px) {
+  .service-block {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .service-block .block-cta {
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+}
+
+/* ================================================================== */
+/*  FORM — date input styling                                          */
+/* ================================================================== */
+
+/* Make the calendar popup match the theme (dark mode on fire theme) */
+[data-theme="fire"] .enquiry-form input[type="date"] {
+  color-scheme: dark;
+}
+
+/* Make the calendar icon visible on dark backgrounds */
+[data-theme="fire"] .enquiry-form input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.85);
+  opacity: 0.85;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+[data-theme="fire"] .enquiry-form input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background: rgba(255, 122, 45, 0.15);
+}
+
+/* Empty date shows as grayed out like other placeholders */
+.enquiry-form input[type="date"]:invalid,
+.enquiry-form input[type="date"]:not(:focus):not(.has-value) {
+  color: var(--text-dim);
+}
+
+/* Date has a value — use full ink colour */
+.enquiry-form input[type="date"]:focus,
+.enquiry-form input[type="date"].has-value,
+.enquiry-form input[type="date"]:valid {
+  color: var(--ink);
+}
+
+/* Firefox-specific — date fields use different internals */
+@-moz-document url-prefix() {
+  .enquiry-form input[type="date"] {
+    color-scheme: dark;
+  }
+}
+
+/* Light theme — no inversion needed */
+[data-theme="rose"] .enquiry-form input[type="date"],
+:root:not([data-theme]) .enquiry-form input[type="date"] {
+  color-scheme: light;
+}

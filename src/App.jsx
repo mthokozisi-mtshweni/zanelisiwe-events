@@ -72,7 +72,7 @@ const SERVICES = [
     title: "Traditional ceremony",
     tag: "Full Inventory",
     image: IMAGES.tradition,
-    video: "  /Tradition.mp4",
+    video: "/Tradition.mp4",
     text: "Quality furniture and elegant décor at accessible prices. Extensive inventory of chairs, tables, linens, and styling elements."
   },
   {
@@ -439,9 +439,37 @@ function About({ navigate }) {
 
 function Services({ onNavigate }) {
   const videoRefs = useRef({});
-  const [activeIndex, setActiveIndex] = useState(null);
   const activeRef = useRef(null);
   const tokenRef = useRef(0);
+  const readyRef = useRef({});
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  // Pre-warm videos on mount — decode frames so first hold is instant
+  useEffect(() => {
+    Object.entries(videoRefs.current).forEach(([idx, v]) => {
+      if (!v) return;
+      const warm = () => {
+        try {
+          v.muted = true;
+          v.currentTime = 0;
+          const p = v.play();
+          if (p?.then) {
+            p.then(() => {
+              v.pause();
+              v.currentTime = 0;
+              readyRef.current[idx] = true;
+            }).catch(() => {});
+          } else {
+            v.pause();
+            v.currentTime = 0;
+            readyRef.current[idx] = true;
+          }
+        } catch {}
+      };
+      if (v.readyState >= 2) warm();
+      else v.addEventListener("loadeddata", warm, { once: true });
+    });
+  }, []);
 
   const pauseVideo = (i) => {
     const v = videoRefs.current[i];
@@ -450,13 +478,6 @@ function Services({ onNavigate }) {
       v.pause();
       v.currentTime = 0;
     } catch {}
-  };
-
-  const deactivate = () => {
-    tokenRef.current += 1;
-    if (activeRef.current !== null) pauseVideo(activeRef.current);
-    activeRef.current = null;
-    setActiveIndex(null);
   };
 
   const activate = async (i) => {
@@ -470,52 +491,57 @@ function Services({ onNavigate }) {
     activeRef.current = i;
     const token = ++tokenRef.current;
 
+    v.currentTime = 0;
     try {
-      v.currentTime = 0;
       await v.play();
     } catch {
       if (tokenRef.current === token) activeRef.current = null;
       return;
     }
 
-    const startedAt = Date.now();
-    const check = () => {
-      if (tokenRef.current !== token) return;
-      if (activeRef.current !== i) return;
+    const start = Date.now();
+    const painted = await new Promise((resolve) => {
+      const check = () => {
+        if (tokenRef.current !== token || activeRef.current !== i) {
+          return resolve(false);
+        }
+        if (v.videoWidth > 0 && v.readyState >= 2 && v.currentTime > 0.03) {
+          return resolve(true);
+        }
+        if (Date.now() - start > 3000) {
+          return resolve(false);
+        }
+        requestAnimationFrame(check);
+      };
+      check();
+    });
 
-      const hasFrames =
-        v.videoWidth > 0 &&
-        v.videoHeight > 0 &&
-        v.readyState >= 2 &&
-        !v.paused;
+    if (tokenRef.current !== token || activeRef.current !== i) return;
 
-      if (hasFrames) {
-        setActiveIndex(i);
-        return;
-      }
-
-      if (Date.now() - startedAt > 3000) {
-        console.warn(
-          `[Services] Video ${i} failed to render in 3s — check that the file exists on the server.`,
-          { src: v.currentSrc || v.src, readyState: v.readyState, videoWidth: v.videoWidth }
-        );
-        pauseVideo(i);
-        activeRef.current = null;
-        return;
-      }
-
-      requestAnimationFrame(check);
-    };
-
-    check();
+    if (painted) {
+      setActiveIndex(i);
+    } else {
+      pauseVideo(i);
+      activeRef.current = null;
+    }
   };
 
-  const handleTap = (i) => {
-    if (activeRef.current === i) {
-      deactivate();
-    } else {
-      activate(i);
-    }
+  const deactivate = () => {
+    tokenRef.current += 1;
+    if (activeRef.current !== null) pauseVideo(activeRef.current);
+    activeRef.current = null;
+    setActiveIndex(null);
+  };
+
+  const onPointerDown = (e, i) => {
+    if (e.pointerType === "mouse") return;
+    if (e.target.closest(".block-cta")) return;
+    activate(i);
+  };
+
+  const onPointerUp = (e) => {
+    if (e.pointerType === "mouse") return;
+    deactivate();
   };
 
   return (
@@ -533,12 +559,15 @@ function Services({ onNavigate }) {
           <article
             key={s.title}
             className={`service-block ${activeIndex === i ? "is-active" : ""}`}
-            onMouseEnter={() => { if (window.innerWidth > 720) activate(i); }}
-            onMouseLeave={() => { if (window.innerWidth > 720) deactivate(); }}
-            onClick={(e) => {
-              if (window.innerWidth > 720) return;
-              if (e.target.closest(".block-cta")) return;
-              handleTap(i);
+            onPointerDown={(e) => onPointerDown(e, i)}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            onPointerLeave={onPointerUp}
+            onMouseEnter={() => {
+              if (window.matchMedia("(hover: hover)").matches) activate(i);
+            }}
+            onMouseLeave={() => {
+              if (window.matchMedia("(hover: hover)").matches) deactivate();
             }}
             tabIndex={0}
             data-reveal
@@ -552,23 +581,22 @@ function Services({ onNavigate }) {
                   src={s.video}
                   poster={s.image}
                   muted
-                  loop
                   playsInline
-                  preload="metadata"
+                  preload="auto"
+                  onError={() => { readyRef.current[i] = false; }}
+                  onEnded={deactivate}
                   aria-hidden="true"
                 />
               )}
             </div>
 
             <div className="block-overlay" />
-            <div className="block-vignette" />
 
             <div className="block-content">
               <div className="block-top">
                 <span className="block-num">{s.num}</span>
                 {s.tag && <span className="block-tag">{s.tag}</span>}
               </div>
-
               <div className="block-bottom">
                 <h3>{s.title}</h3>
                 <p>{s.text}</p>
